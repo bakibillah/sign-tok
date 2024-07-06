@@ -15,6 +15,8 @@ class HashTagScraper:
         self.base_url: str
         self.cursor: int = 0
         self.video_count: int = 0
+        self.proxy: {str: str} = {'http': 'http://XGwHmYs86gIO:KuNYFojtGl@65.21.25.28:1065',
+                                  'https': 'http://XGwHmYs86gIO:KuNYFojtGl@65.21.25.28:1065'}
 
     def get_signature(self, cursor):
         headers_ = {
@@ -38,7 +40,17 @@ class HashTagScraper:
                        "X-Tt-Params": self.get_signature(index),
                        "Accept-Encoding": "gzip, deflate"
                        }
-            res = session.get(url, headers=headers)
+            cookie = {'tt_csrf_token': 'v7ZFtICf-T6mxIEmgdfzvK_OYSqU5QUJoz0c',
+                      'tt_chain_token': 'qnLMxM1KqZGaeEw8zxT7gA==',
+                      'tiktok_webapp_theme_auto_dark_ab': '1',
+                      'tiktok_webapp_theme_source': 'system',
+                      'tiktok_webapp_theme': 'light',
+                      'ttwid': '1%7CRFTAlDGgI4GcMcrM_7xv_W1X0bIVNygfIkNkvzdVBxQ%7C1720264308%7C87c793b08c606e555d152aedb19ac318570e824a56ee07e056e59d00d6818957',
+                      'NID': '515=s2w_qKMyNo-TFe-i8kgWOnPsXkz5DnMvLa9_569PGSM8CqWuiJjmRlC4_MHmJh4zhYvJ60-abgGlnYaux37ge_mLR623RcaRt_LlvkJg-9fwArwizmHV26mBGMR2lok-4OcZoPT-EkgAtJgvGuBHXVsdjsRdSZWIzJsWccuFoso',
+                      # 'sessionid': '7954a27acd31acb425adf12c69e5bcf8', #
+                      'sessionid': '49aedc472a1491d70d2a40b3b836751a',  # apple id
+                      'tt-target-idc': 'useast5'}
+            res = session.get(url, headers=headers, cookies=cookie, proxies=self.proxy)
             try:
                 data = res.json()
 
@@ -59,11 +71,10 @@ class HashTagScraper:
                     except KeyError:
                         pass
 
-
-                time.sleep(random.randint(3, 5))
+                time.sleep(random.randint(1, 3))
             except JSONDecodeError:
                 time.sleep(5)
-                print(f"json decode error: {index+1}")
+                print(f"json decode error: {index + 1}")
 
     def get_challenge_id(self, challenge_name):
         cookies = {
@@ -97,7 +108,8 @@ class HashTagScraper:
             'challengeName': challenge_name,
         }
 
-        response = requests.get('https://t.tiktok.com/api/challenge/detail/', params=params, cookies=cookies, headers=headers_challenge)
+        response = requests.get('https://t.tiktok.com/api/challenge/detail/', params=params, cookies=cookies,
+                                headers=headers_challenge)
 
         self.challengeID = response.json()["challengeInfo"]["challenge"]["id"]
 
@@ -105,5 +117,5 @@ class HashTagScraper:
         return self.challengeID
 
 
-scraper_instance = HashTagScraper('tiktokbangladesh')
+scraper_instance = HashTagScraper('trump')
 scraper_instance.get_hashtag_data(1000)
