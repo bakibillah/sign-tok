@@ -8,18 +8,20 @@ session = requests.session()
 
 class HashTagScraper:
     def __init__(self, challenge_name):
-        self.signature_server_url: str = 'http://127.0.0.1:8888/signature'
+        self.signature_server_url: str = 'http://127.0.0.1:8080/signature'
 
         self.challenge_name: str = challenge_name
         self.challengeID: str = self.get_challenge_id(challenge_name)
         self.base_url: str
+        self.cursor: int = 0
+        self.video_count: int = 0
 
     def get_signature(self, cursor):
         headers_ = {
             'Content-type': 'application/json',
         }
 
-        input_url_hashtag = f'https://www.tiktok.com/api/challenge/item_list/?aid=1988&count=30&challengeID={self.challengeID}&cursor={cursor}&cookie_enabled=true&screen_width=0&screen_height=0&browser_language=&browser_platform=&browser_name=&browser_version=&browser_online=&timezone_name=Europe%2FLondon'
+        input_url_hashtag = f'https://www.tiktok.com/api/challenge/item_list/?aid=1988&count=30&challengeID={self.challengeID}&cursor={self.cursor}&cookie_enabled=true&screen_width=0&screen_height=0&browser_language=&browser_platform=&browser_name=&browser_version=&browser_online=&timezone_name=Europe%2FLondon'
         input_url_search = f'https://www.tiktok.com/api/search/general/full/?aid=1988&offset=0&keyword=princemamun&cookie_enabled=true&screen_width=0&screen_height=0&browser_language=&browser_platform=&browser_name=&browser_version=&browser_online=&timezone_name=Europe%2FLondon'
 
         response = requests.post(self.signature_server_url, headers=headers_, data=input_url_hashtag)
@@ -40,7 +42,7 @@ class HashTagScraper:
             try:
                 data = res.json()
 
-                cursor_static = data['cursor']
+                self.cursor = data['cursor']
                 has_more = data['hasMore']
                 if has_more is False:
                     print("no more page is available, so exiting the scraper")
@@ -50,8 +52,10 @@ class HashTagScraper:
                 print(f"itemList: found {len(itemList)} items")
                 for item in itemList:
                     try:
+                        self.video_count += 1
+                        video_id = item['id']
                         description = item['contents'][0]['desc']
-                        # print(f"{index + 1}: {description}")
+                        print(f"{self.video_count}: {description} : video id: {video_id}")
                     except KeyError:
                         pass
 
